@@ -46,6 +46,9 @@ func main() {
 
 		chromedp.WaitVisible(`li.select_form_b`, chromedp.ByQuery),
 		chromedp.Click(`li.select_form_b:first-of-type`, chromedp.ByQuery),
+
+		chromedp.WaitVisible(`#TicketForm_ticketPrice_03`, chromedp.ByQuery),
+		chromedp.SetValue(`#TicketForm_ticketPrice_03`, "2", chromedp.ByQuery),
 	)
 
 	if err != nil {
