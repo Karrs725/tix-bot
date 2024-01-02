@@ -29,17 +29,23 @@ func main() {
 	}
 
 	log.Println("正在訪問網站")
-	var ticketPageURL string
+	//var ticketPageURL string
 	err := chromedp.Run(ctx,
 		chromedp.ActionFunc(func(ctx context.Context) error {
 			return network.SetCookies([]*network.CookieParam{sidCookie}).Do(ctx)
 		}),
 		chromedp.Navigate("https://tixcraft.com/activity/detail/24_lesmis"),
+
 		chromedp.WaitVisible(`.buy`, chromedp.ByQuery),
-		chromedp.AttributeValue(`.buy a`, "href", &ticketPageURL, nil),
+		//chromedp.Click(`#onetrust-accept-btn-handler`, chromedp.NodeVisible),
+		//chromedp.AttributeValue(`.buy a`, "href", &ticketPageURL, nil),
 		chromedp.Click(`.buy`, chromedp.NodeVisible),
+
 		chromedp.WaitVisible(`#gameList`, chromedp.ByQuery),
 		chromedp.Click(`//tr[contains(., '2024/01/07 (日)  15:00')]//button[contains(@class, 'btn-primary')]`, chromedp.BySearch),
+
+		chromedp.WaitVisible(`li.select_form_b`, chromedp.ByQuery),
+		chromedp.Click(`li.select_form_b:first-of-type`, chromedp.ByQuery),
 	)
 
 	if err != nil {
