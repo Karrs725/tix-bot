@@ -46,7 +46,7 @@ func setInputData() *tview.Form {
 	})
 
 	form.AddButton("Save", func() {
-		pages.SwitchToPage("Menu")
+		app.Stop()
 	})
 
 	return form
@@ -56,6 +56,7 @@ func main() {
 	log.Println("開始執行腳本")
 
 	// get input data
+	has_input := false
 
 	flex.SetDirection(tview.FlexRow).
 		AddItem(text, 0, 1, false)
@@ -64,6 +65,7 @@ func main() {
 		if event.Rune() == 113 {
 			app.Stop()
 		} else if event.Rune() == 97 {
+			has_input = true
 			form.Clear(true)
 			setInputData()
 			pages.SwitchToPage("Add Input Data")
@@ -78,47 +80,50 @@ func main() {
 		panic(err)
 	}
 	//
+	if has_input {
+		allocatorCtx, cancel := chromedp.NewExecAllocator(context.Background(), append(
+			chromedp.DefaultExecAllocatorOptions[:],
+			chromedp.Flag("headless", false), // 禁用無頭模式
+		)...)
+		defer cancel()
 
-	allocatorCtx, cancel := chromedp.NewExecAllocator(context.Background(), append(
-		chromedp.DefaultExecAllocatorOptions[:],
-		chromedp.Flag("headless", false), // 禁用無頭模式
-	)...)
-	defer cancel()
+		ctx, cancel := chromedp.NewContext(allocatorCtx)
+		defer cancel()
 
-	ctx, cancel := chromedp.NewContext(allocatorCtx)
-	defer cancel()
+		sidCookie := &network.CookieParam{
+			Name:   "SID",
+			Value:  inputdata.sid,
+			Domain: "tixcraft.com",
+		}
 
-	sidCookie := &network.CookieParam{
-		Name:   "SID",
-		Value:  inputdata.sid,
-		Domain: "tixcraft.com",
-	}
+		log.Println("正在訪問網站")
+		//var ticketPageURL string
+		err := chromedp.Run(ctx,
+			chromedp.ActionFunc(func(ctx context.Context) error {
+				return network.SetCookies([]*network.CookieParam{sidCookie}).Do(ctx)
+			}),
+			chromedp.Navigate(inputdata.url),
 
-	log.Println("正在訪問網站")
-	//var ticketPageURL string
-	err := chromedp.Run(ctx,
-		chromedp.ActionFunc(func(ctx context.Context) error {
-			return network.SetCookies([]*network.CookieParam{sidCookie}).Do(ctx)
-		}),
-		chromedp.Navigate(inputdata.url),
+			chromedp.WaitVisible(`.buy`, chromedp.ByQuery),
+			chromedp.Click(`.buy`, chromedp.NodeVisible),
 
-		chromedp.WaitVisible(`.buy`, chromedp.ByQuery),
-		chromedp.Click(`.buy`, chromedp.NodeVisible),
+			chromedp.WaitVisible(`#gameList`, chromedp.ByQuery),
+			chromedp.Click(`//tr[contains(., '2024/01/07 (日)  15:00')]//button[contains(@class, 'btn-primary')]`, chromedp.BySearch),
 
-		chromedp.WaitVisible(`#gameList`, chromedp.ByQuery),
-		chromedp.Click(`//tr[contains(., '2024/01/07 (日)  15:00')]//button[contains(@class, 'btn-primary')]`, chromedp.BySearch),
+			chromedp.WaitVisible(`li.select_form_b`, chromedp.ByQuery),
+			chromedp.Click(`li.select_form_b:first-of-type`, chromedp.ByQuery),
 
-		chromedp.WaitVisible(`li.select_form_b`, chromedp.ByQuery),
-		chromedp.Click(`li.select_form_b:first-of-type`, chromedp.ByQuery),
+			chromedp.WaitVisible(`#TicketForm_ticketPrice_03`, chromedp.ByQuery),
+			chromedp.SetValue(`#TicketForm_ticketPrice_03`, inputdata.num, chromedp.ByQuery),
+		)
 
-		chromedp.WaitVisible(`#TicketForm_ticketPrice_03`, chromedp.ByQuery),
-		chromedp.SetValue(`#TicketForm_ticketPrice_03`, inputdata.num, chromedp.ByQuery),
-	)
-
-	if err != nil {
-		log.Printf("遇到錯誤：%v", err)
+		if err != nil {
+			log.Printf("遇到錯誤：%v", err)
+		} else {
+			log.Println("腳本執行完成")
+		}
 	} else {
-		log.Println("腳本執行完成")
+		fmt.Println("無輸入資料")
 	}
 
 	var input string
