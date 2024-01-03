@@ -81,8 +81,7 @@ func main() {
 
 	allocatorCtx, cancel := chromedp.NewExecAllocator(context.Background(), append(
 		chromedp.DefaultExecAllocatorOptions[:],
-		// 確保不包括 chromedp.Headless 選項
-		chromedp.Flag("headless", false), // 這行可以明確禁用無頭模式（通常不是必需的，除非在默認選項中包含了無頭模式）
+		chromedp.Flag("headless", false), // 禁用無頭模式
 	)...)
 	defer cancel()
 
@@ -104,8 +103,6 @@ func main() {
 		chromedp.Navigate(inputdata.url),
 
 		chromedp.WaitVisible(`.buy`, chromedp.ByQuery),
-		//chromedp.Click(`#onetrust-accept-btn-handler`, chromedp.NodeVisible),
-		//chromedp.AttributeValue(`.buy a`, "href", &ticketPageURL, nil),
 		chromedp.Click(`.buy`, chromedp.NodeVisible),
 
 		chromedp.WaitVisible(`#gameList`, chromedp.ByQuery),
