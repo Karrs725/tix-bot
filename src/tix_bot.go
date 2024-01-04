@@ -15,6 +15,7 @@ type InputData struct {
 	url  string
 	sid  string
 	date string
+	time string
 	num  string
 }
 
@@ -39,6 +40,10 @@ func setInputData() *tview.Form {
 
 	form.AddInputField("Date", "", 20, nil, func(date string) {
 		inputdata.date = date
+	})
+
+	form.AddInputField("Time", "", 20, nil, func(time string) {
+		inputdata.time = time
 	})
 
 	form.AddInputField("Num", "", 20, nil, func(num string) {
@@ -108,7 +113,7 @@ func main() {
 			chromedp.Click(`.buy`, chromedp.NodeVisible),
 
 			chromedp.WaitVisible(`#gameList`, chromedp.ByQuery),
-			chromedp.Click(`//tr[contains(., '2024/01/07 (日)  15:00')]//button[contains(@class, 'btn-primary')]`, chromedp.BySearch),
+			chromedp.Click(fmt.Sprintf(`//tr[contains(., '%s') and contains(., '%s')]//button[contains(@class, 'btn-primary')]`, inputdata.date, inputdata.time), chromedp.BySearch),
 
 			chromedp.WaitVisible(`li.select_form_b`, chromedp.ByQuery),
 			chromedp.Click(`li.select_form_b:first-of-type`, chromedp.ByQuery),
