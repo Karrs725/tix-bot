@@ -67,9 +67,9 @@ func main() {
 		AddItem(text, 0, 1, false)
 
 	flex.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		if event.Rune() == 113 {
+		if event.Rune() == 'q' {
 			app.Stop()
-		} else if event.Rune() == 97 {
+		} else if event.Rune() == 'a' {
 			has_input = true
 			form.Clear(true)
 			setInputData()
