@@ -118,8 +118,13 @@ func main() {
 			chromedp.WaitVisible(`li.select_form_b`, chromedp.ByQuery),
 			chromedp.Click(`li.select_form_b:first-of-type`, chromedp.ByQuery),
 
-			chromedp.WaitVisible(`#TicketForm_ticketPrice_03`, chromedp.ByQuery),
-			chromedp.SetValue(`#TicketForm_ticketPrice_03`, inputdata.num, chromedp.ByQuery),
+			chromedp.WaitVisible(`#ticketPriceList`, chromedp.ByQuery),
+			chromedp.Evaluate(`
+				var selectElements = document.querySelectorAll("[id^='TicketForm_ticketPrice']");
+				for (var i = 0; i < selectElements.length; i++) {
+					selectElements[i].value = '`+inputdata.num+`';
+				}
+			`, nil),
 		)
 
 		if err != nil {
