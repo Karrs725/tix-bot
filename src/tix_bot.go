@@ -125,6 +125,7 @@ func main() {
 					selectElements[i].value = '`+inputdata.num+`';
 				}
 			`, nil),
+			chromedp.Click(`input[id='TicketForm_agree']`, chromedp.ByQuery),
 		)
 
 		if err != nil {
